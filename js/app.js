@@ -446,6 +446,7 @@ function focusKey(el) {
     const host = el.closest('button, [role="button"], input');
     if (!host) return null;
     if (host.id) return '#' + host.id;
+    if (host.dataset.subcheck !== undefined || host.dataset.backSpot !== undefined && host.classList.contains('cta')) return '.path-chapters .cta';
     const k = FOCUS_KEYS.find(key => host.dataset[key] !== undefined);
     return k ? `[data-${k.replace(/[A-Z]/g, m => '-' + m.toLowerCase())}="${host.dataset[k]}"]` : null;
 }
@@ -561,7 +562,14 @@ function glide(update) {
     vt.updateCallbackDone.catch(e => console.error(e));
     vt.finished.then(done, done);
 }
-function fitControls() { const ctl = $('guidedControls'); if (!ctl.hidden) { ctl.classList.remove('in-flow'); ctl.classList.toggle('in-flow', ctl.offsetHeight > $('readingCol').clientHeight * 0.4); } }
+function fitControls() {
+    const ctl = $('guidedControls');
+    if (ctl.hidden) return;
+    ctl.classList.remove('in-flow', 'compact');
+    const limit = $('readingCol').clientHeight * 0.4;
+    if (ctl.offsetHeight > limit) ctl.classList.add('compact');
+    if (ctl.offsetHeight > limit) ctl.classList.add('in-flow');
+}
 function resetScroll() { $('readingCol').scrollTop = 0; $('reader').scrollTop = 0; }
 function saveGuided() {
     const o = progressToStore(current.solution, current.state);
@@ -637,7 +645,6 @@ function guidedAction(action) {
     if (current.state.c !== null) saveGuided();
     renderGuided(true);
     runFind(false);
-    if (hadFocus) { const b = $('guidedControls').querySelector('.btn.primary'); if (b) b.focus({ preventScroll: true }); }
 }
 
 /* ---------- in-game search ---------- */
@@ -841,7 +848,9 @@ function applyScheme() {
 function applyZoom() {
     const pct = store.getFontScale();
     document.documentElement.style.setProperty('--fs', String(pct / 100));
-    document.documentElement.classList.toggle('fs-large', pct > 115);
+    document.documentElement.classList.remove('fs-large');
+    const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    document.documentElement.classList.toggle('fs-large', pct > 115 || rootPx > 18.5);
     $('zoomSelect').value = String(pct);
 }
 
@@ -885,7 +894,7 @@ function bind() {
             const fwd = e.key === 'ArrowRight' || e.key === ' ', back = e.key === 'ArrowLeft';
             if (!fwd && !back) return;
             e.preventDefault();
-            if (current.sub) { const sb = current.sub; sb.i = Math.max(0, Math.min(sb.items.length - 1, sb.i + (fwd ? 1 : -1))); renderGuided(false); }
+            if (current.sub) { const sb = current.sub; sb.i = Math.max(0, Math.min(sb.items.length - 1, sb.i + (fwd ? 1 : -1))); renderGuided(false); const here = $('content').querySelector('[data-sub="here"]'); if (here && (document.activeElement === document.body || !document.activeElement)) here.focus({ preventScroll: true }); }
             else pickChapter(fwd ? 'next' : 'prev');
             return;
         }
@@ -916,7 +925,7 @@ function bind() {
     $('gameSearch').addEventListener('input', () => { if (!$('gameSearch').value.trim()) document.body.classList.remove('list-filter'); renderList(); renderSuggest(); });
     $('gameSearch').addEventListener('focus', renderSuggest);
     $('gameSearch').addEventListener('keydown', e => {
-        if (e.key === 'Escape') $('suggest').hidden = true;
+        if (e.key === 'Escape' && !$('suggest').hidden) { e.preventDefault(); $('suggest').hidden = true; }
         if (e.key === 'ArrowDown' && $('suggest').hidden && $('gameSearch').value.trim()) { e.preventDefault(); renderSuggest(); return; }
         if ((e.key === 'ArrowDown' || e.key === 'ArrowUp') && !$('suggest').hidden) {
             const rows = [...$('suggest').querySelectorAll('.game-row')];

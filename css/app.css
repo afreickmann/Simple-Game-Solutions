@@ -465,7 +465,7 @@ mark.find.current { outline: 2px solid var(--focus); outline-offset: 1px; }
 
 /* sub-chapter picker */
 .picker { max-width: none; }
-.dialog-note { margin-bottom: 1.25rem; color: var(--text-2); font-size: .9375em; }
+.dialog-note { text-wrap: pretty; margin-bottom: 1.25rem; color: var(--text-2); font-size: .9375em; }
 .pick-card { padding: 1.4rem 1.5rem; border: 1px solid var(--line); border-radius: 16px; }
 .pick-no { color: var(--text-2); color: color-mix(in srgb, var(--text) 72%, transparent); font-size: .8125em; font-weight: 600; }
 .pick-name { margin-top: .25rem; font-size: 1.6em; font-weight: 700; letter-spacing: -.015em; line-height: 1.15; overflow-wrap: anywhere; }
@@ -512,6 +512,9 @@ mark.find.current { outline: 2px solid var(--focus); outline-offset: 1px; }
 .guided-controls .cta { flex: 1 1 12rem; min-width: 0; padding-inline: 1rem; }
 .key-hint { display: none; }
 .guided-controls.in-flow { position: static; }
+.guided-controls.compact .btn:not(.cta):not(.back), .guided-controls.compact .notice p { display: none; }
+.guided-controls.compact .btn.back .back-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.guided-controls.compact .cta { flex: 1 1 0; order: 0; }
 .history-bar-hint { flex: 1 1 100%; font-size: .8125rem; }
 .desktop-only { display: none; }
 #langFilter { max-width: 11rem; }
